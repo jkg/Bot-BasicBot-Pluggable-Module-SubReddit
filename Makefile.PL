@@ -16,6 +16,7 @@ WriteMakefile(
     },
     BUILD_REQUIRES => {
         'Test::More' => 0,
+        'Test::Bot::BasicBot::Pluggable' => 0,
     },
     PREREQ_PM => {
         'URI::Title' => 0,
