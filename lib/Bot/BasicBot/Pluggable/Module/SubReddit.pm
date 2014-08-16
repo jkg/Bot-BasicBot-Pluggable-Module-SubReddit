@@ -1,12 +1,13 @@
 package Bot::BasicBot::Pluggable::Module::SubReddit;
 
-use 5.006;
+use base qw(Bot::BasicBot::Pluggable::Module);
+
 use strict;
-use warnings FATAL => 'all';
+use warnings;
 
 =head1 NAME
 
-Bot::BasicBot::Pluggable::Module::SubReddit - The great new Bot::BasicBot::Pluggable::Module::SubReddit!
+Bot::BasicBot::Pluggable::Module::SubReddit - a simple reddit-related helper plugin for Bot::BasicBot::Pluggable
 
 =head1 VERSION
 
@@ -16,37 +17,62 @@ Version 0.01
 
 our $VERSION = '0.01';
 
-
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
+Spots likely subreddit links (e.g. "r/perl" or "/r/dailyprogrammer") and replies with the URL and description of the subreddit.
 
-Perhaps a little code snippet.
+    $bot->load('SubReddit');
 
-    use Bot::BasicBot::Pluggable::Module::SubReddit;
-
-    my $foo = Bot::BasicBot::Pluggable::Module::SubReddit->new();
-    ...
-
-=head1 EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
-
-=head1 SUBROUTINES/METHODS
-
-=head2 function1
+No, really, that's it.
 
 =cut
 
-sub function1 {
+=head1 IRC Usage
+
+Just mention the a subreddit and the bot will offer a link and some details.
+
+	01:38:12 <jkg> r/AskReddit
+	01:38:12 <hadaly> Reddit: http://www.reddit.com/r/AskReddit -- Ask Reddit...
+	01:38:25 <jkg> r/IAmA
+	01:38:26 <hadaly> Reddit: http://www.reddit.com/r/IAmA -- I Am A, where the mundane becomes fascinating and the outrageous suddenly seems normal.
+	01:38:36 <jkg> /r/bifl
+	01:38:36 <hadaly> Reddit: http://www.reddit.com/r/bifl -- Buy it for life
+
+=cut
+
+sub help {
+    return "Links to, and describes, subreddits mentioned as /r/subname";
 }
 
-=head2 function2
+sub init {
+    my $self = shift;
+    $self->config(
+        {} # nothing to configure yet; might add API-fu later though
+    );
+}
 
-=cut
+sub told {
 
-sub function2 {
+    my ( $self, $mess ) = @_;
+
+    for ( split / /, $mess->{body} ) {
+
+        next unless $_ =~ m!^/?(r/[A-Za-z0-9_]+)[;,]?!; # does this look like a subreddit name?
+
+        my $url = "http://www.reddit.com/$1";
+
+        my $uri = URI->new($url);
+        next unless $uri;
+
+        my $title = title($uri->as_string());
+        #next unless defined $title;
+
+        my $result = "Reddit: $url -- $title";
+        $self->reply( $mess, $result );
+    }
+
+    return;    # Title.pm is passive, and doesn't intercept things.
+               # and we want to be just like Title.pm when we grow up
 }
 
 =head1 AUTHOR
@@ -138,4 +164,4 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
-1; # End of Bot::BasicBot::Pluggable::Module::SubReddit
+42; # End of Bot::BasicBot::Pluggable::Module::SubReddit
