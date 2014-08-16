@@ -5,6 +5,8 @@ use base qw(Bot::BasicBot::Pluggable::Module);
 use strict;
 use warnings;
 
+use URI::Title qw/title/;
+
 =head1 NAME
 
 Bot::BasicBot::Pluggable::Module::SubReddit - a simple reddit-related helper plugin for Bot::BasicBot::Pluggable
@@ -61,10 +63,7 @@ sub told {
 
         my $url = "http://www.reddit.com/$1";
 
-        my $uri = URI->new($url);
-        next unless $uri;
-
-        my $title = title($uri->as_string());
+        my $title = title($url);
         #next unless defined $title;
 
         my $result = "Reddit: $url -- $title";
